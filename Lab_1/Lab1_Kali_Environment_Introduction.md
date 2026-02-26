@@ -76,7 +76,7 @@ This is important in ethical hacking scenarios when working with:
 * Data extraction from physical devices
   
 
-![lsblk output](lsblk_Output.png/image.png)
+![lsblk output](Screenshots/lsblk_Output.png)
   
 
 ---
