@@ -1,16 +1,9 @@
 ---
 
 # Lab 2 – Information Gathering and Parallel Hash/Crypto Attacks
-
 **Course:** Ethical Hacking (GDT3CR)  
-
-
 **Platform:** Raspberry Pi 4  
-
-
 **Operating System:** Kali Linux  
-
-
 **User:** freesensei
 
 ---
