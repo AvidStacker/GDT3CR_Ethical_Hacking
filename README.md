@@ -8,7 +8,7 @@ The course focuses on understanding attacker methodologies, performing ethical p
 
 ---
 
-## 🎯 Learning Outcomes
+## Learning Outcomes
 
 Upon completion of the course, the student is able to:
 
@@ -72,7 +72,7 @@ Including discussions about:
 
 ---
 
-## 🛠 Topics Covered
+## Topics Covered
 
 - Linux system analysis
 - Network service enumeration
@@ -87,7 +87,7 @@ Including discussions about:
 
 ---
 
-## ⚖ Ethical Disclaimer
+## Ethical Disclaimer
 
 All exercises and demonstrations in this repository were conducted in controlled lab environments for educational purposes only.
 
@@ -95,7 +95,7 @@ No unauthorized systems were targeted.
 
 ---
 
-## 📚 Technologies Used
+## Technologies Used
 
 - Kali Linux
 - Linux kernel tools
@@ -105,7 +105,7 @@ No unauthorized systems were targeted.
 
 ---
 
-## 📌 Purpose of This Repository
+## Purpose of This Repository
 
 This repository serves as:
 
