@@ -1,4 +1,3 @@
----
 
 # Lab 2 – Information Gathering and Parallel Hash/Crypto Attacks
 **Course:** Ethical Hacking (GDT3CR)  
