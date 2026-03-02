@@ -70,8 +70,6 @@ http://10.0.0.146/vulnerabilities/csrf/?password_new=test&password_conf=test&Cha
 
 If a victim clicks the link while authenticated, the password changes immediately due to lack of CSRF token validation.
 
-![CSRF Exploit](Screenshots/DVWA_CSRF.png)
-
 ---
 
 ## 3.1d File Inclusion (LFI)
