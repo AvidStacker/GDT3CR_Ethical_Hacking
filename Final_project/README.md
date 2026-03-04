@@ -1,7 +1,7 @@
 # Ethical Hacking Project
 ## Rogue Access Point and Credential Harvesting using EvilPortal
 
-**Author:** Your Name  
+**Author:** Isak Lagerberg 
 **Course:** Ethical Hacking – GDT3CR  
 
 ---
