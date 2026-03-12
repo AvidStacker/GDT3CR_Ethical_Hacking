@@ -99,7 +99,7 @@ No unauthorized systems were targeted.
 
 - Kali Linux
 - Linux kernel tools
-- Network diagnostic utilities
+- Network diagnostics using tools such as Netstat, Wireshark, and Nmap.
 - Remote access tools (SSH, VNC, Netcat)
 - Virtualization environments
 
