@@ -52,7 +52,7 @@ wlan1 → Rogue access point
 Example adapter used:
 
 ```
-Alfa AWUS036ACH
+Alfa AWUS036AXML
 ```
 
 ### Victim Device
