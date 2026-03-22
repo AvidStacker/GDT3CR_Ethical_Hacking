@@ -428,7 +428,7 @@ sudo systemctl stop lighttpd
 
 # Improvements & Extensions
 
-This lab demonstrates a basic rogue access point with a captive portal. To make the setup more realistic, stealthy, and technically advanced, the following enhancements can be implemented.
+This lab demonstrates a basic rogue access point with a captive portal, but it can be further improved to be more realistic, stealthy, and technically advanced through several enhancements.
 
 ---
 
