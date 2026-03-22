@@ -426,6 +426,131 @@ sudo systemctl stop lighttpd
 
 ---
 
+# Improvements & Extensions
+
+This lab demonstrates a basic rogue access point with a captive portal. To make the setup more realistic, stealthy, and technically advanced, the following enhancements can be implemented.
+
+---
+
+## 1. Reduce Attacker Visibility (Stealth Improvements)
+
+**Goal:** Make the attacker infrastructure harder to detect.
+
+* **Hide the upstream hotspot SSID**
+
+  * Disable SSID broadcast on your phone hotspot
+  * Prevents easy correlation between attacker device and internet source
+
+* **Rename interfaces and hostname**
+
+  ```bash
+  sudo hostnamectl set-hostname printer-service
+  ```
+
+  * Makes the device look less suspicious on networks
+
+* **Lower transmission power (optional)**
+
+  ```bash
+  iwconfig wlan1 txpower 10
+  ```
+
+  * Reduces physical detection range
+
+* **MAC address randomization**
+
+  ```bash
+  macchanger -r wlan1
+  ```
+
+  * Avoids hardware fingerprinting
+
+---
+
+## 2. Improve Captive Portal Realism
+
+**Goal:** Increase likelihood of user interaction.
+
+* **Clone real login portals**
+
+  * Copy HTML/CSS from legitimate networks (e.g., hotel, campus)
+  * Tools like:
+
+    * `wget`
+    * browser dev tools
+
+* **Add branding elements**
+
+  * Logos
+  * Terms of service
+  * “Accept & Continue” buttons
+
+* **Implement HTTPS (important realism factor)**
+
+  * Use self-signed certificates or tools like:
+
+    * `sslstrip` (lab only)
+  * Note: modern browsers will warn users
+
+* **Device-specific portals**
+
+  * Serve different pages for:
+
+    * iOS captive portal detection
+    * Android connectivity check
+
+---
+
+## 3. Add Internet Access After Login
+
+**Goal:** Make the attack less suspicious by providing real connectivity.
+
+* Enable NAT forwarding:
+
+```bash
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+```
+
+* Configure iptables:
+
+```bash
+sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+sudo iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
+```
+
+* Result:
+
+  * Victim gets internet access after submitting credentials
+  * Reduces suspicion significantly
+
+---
+
+## 4. Persistence & Automation
+
+**Goal:** Make the setup reusable and autonomous.
+
+* Create a startup script:
+
+```bash
+sudo systemctl enable hostapd
+sudo systemctl enable dnsmasq
+sudo systemctl enable lighttpd
+```
+
+* Or build a single launch script:
+
+```bash
+#!/bin/bash
+systemctl start hostapd
+systemctl start dnsmasq
+systemctl start lighttpd
+```
+
+* Turn the Pi into a “plug-and-play” rogue AP device
+
+
+---
+
 # Mapping to the Attack Lifecycle
 
 | Stage             | Demonstration                |
