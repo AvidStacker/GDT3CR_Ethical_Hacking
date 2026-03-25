@@ -12,7 +12,7 @@ The goal of this lab is to demonstrate how an attacker can perform an Evil Twin 
 
 # Summary
 
-This lab demonstrates how multiple wireless attack techniques can be chained together to create an Adversary-in-the-Middle position. The attacker forces clients to disconnect from a legitimate network, lures them into connecting to a fake access point, and presents a captive portal to collect credentials.
+This lab demonstrates how multiple wireless attack techniques can be chained together. The attacker forces clients to disconnect from a legitimate network, lures them into connecting to a fake access point, and presents a captive portal to collect credentials.
 
 ---
 
@@ -23,7 +23,7 @@ This lab assumes basic knowledge of:
 * Wi-Fi networking (SSID, BSSID, channels)
 * WPA2 authentication
 * Linux/Kali Linux usage
-* Basic networking concepts (DNS, DHCP)
+* Basic networking concepts
 
 ---
 
