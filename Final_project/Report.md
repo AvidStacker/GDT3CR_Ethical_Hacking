@@ -308,11 +308,21 @@ Indicators of attack:
 
 # Prevention
 
-* WPA3 or WPA2-Enterprise (802.1X)
-* Protected Management Frames (802.11w)
-* Wireless IDS/WIPS
-* Certificate validation enforcement
-* User awareness training
+**WPA3 or WPA2-Enterprise (802.1X)**
+Provides strong authentication, making it difficult to replicate legitimate networks and perform Evil Twin attacks.
+
+**Protected Management Frames (802.11w)**
+Prevents deauthentication attacks by protecting management frames from being spoofed.
+
+**Wireless IDS / WIPS**
+Detects rogue access points and suspicious behavior such as duplicate SSIDs or deauth activity.
+
+**Certificate Validation Enforcement**
+Helps prevent phishing by ensuring users only trust legitimate servers and certificates.
+
+**User Awareness Training**
+Reduces risk by teaching users to recognize fake networks and suspicious login pages.
+
 
 ---
 
