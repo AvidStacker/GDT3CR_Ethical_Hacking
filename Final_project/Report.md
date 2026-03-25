@@ -14,6 +14,8 @@ The goal of this lab is to demonstrate how an attacker can perform an Evil Twin 
 
 This lab demonstrates how multiple wireless attack techniques can be chained together. The attacker forces clients to disconnect from a legitimate network, lures them into connecting to a fake access point, and presents a captive portal to collect credentials.
 
+In this implementation, a custom captive portal was originally planned to increase realism, but due to time constraints the default Airgeddon portal was used instead.
+
 ---
 
 # Background
@@ -234,7 +236,7 @@ Choose:
 * Custom captive portal
 
 **Recommended:**
-Wi-Fi password verification portal
+Wi-Fi password verification portal (i.e. default)
 
 ---
 
