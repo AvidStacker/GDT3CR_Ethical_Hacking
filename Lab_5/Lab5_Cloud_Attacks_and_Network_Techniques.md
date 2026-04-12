@@ -71,9 +71,7 @@ Code: NoSuchBucket
 
 ### Python Bucket Scanner (POC)
 A simple Python script was created to automate bucket checks:
-```bash
-python3 bucket_scan.py
-```
+`python3 bucket_scan.py`
 
 Output:
 ```bash
