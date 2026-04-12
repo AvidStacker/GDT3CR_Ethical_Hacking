@@ -17,6 +17,7 @@ python3 countips.py oci_eu.txt
 ```
 
 Result:
+
 `38400`
 
 
@@ -56,6 +57,7 @@ Code: NoSuchBucket
 
 ### Non-existing Bucket Test
 A second test was performed with a non-existing bucket:
+
 `lab2-bucket123`
 
 Command:
@@ -71,6 +73,7 @@ Code: NoSuchBucket
 
 ### Python Bucket Scanner (POC)
 A simple Python script was created to automate bucket checks:
+
 `python3 bucket_scan.py`
 
 Output:
