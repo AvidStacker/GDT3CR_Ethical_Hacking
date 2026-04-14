@@ -1,6 +1,6 @@
 # Lab5_Cloud_Attacks_and_Network_Techniques
 
-**Student:** <Ditt namn>  
+**Student:** Isak Lagerberg  
 **Course:** GDT3CR – Ethical Hacking  
 **Lab:** 5  
 
@@ -16,13 +16,13 @@ To estimate the number of possible IPv4 addresses in a cloud region, the provide
 python3 countips.py oci_eu.txt
 ```
 
-Result:  
-`38400`
+Result: `38400`
 
+![IP calculation result](Screenshots/ip_count.png)
 
 ### Network Scan
 
-A scan was performed on a private RFC1918 /16 network using masscan targeting TLS-related ports:
+A scan was performed on a private RFC1918 /16 network using `masscan` targeting TLS-related ports:
 
 ```bash
 sudo masscan 10.0.0.0/16 -p443,3389 --rate 10000
@@ -34,6 +34,10 @@ Starting masscan...
 Initiating SYN Stealth Scan
 Scanning 65536 hosts [2 ports/host]
 ```
+
+![Masscan network scan result](Screenshots/masscan_scan.png)
+
+This demonstrates how large internal network ranges can be scanned efficiently in a cloud environment.
 
 ## 5.1.4 Cloud Bucket Discovery
 ### Bucket Discovery Test
@@ -54,9 +58,10 @@ HTTP/1.1 404 Not Found
 Code: NoSuchBucket
 ```
 
+![Bucket test result](Screenshots/bucket_test.png)
+
 ### Non-existing Bucket Test
-A second test was performed with a non-existing bucket:  
-`lab2-bucket123`
+A second test was performed with a non-existing bucket: `lab2-bucket123`
 
 Command:
 ```bash
@@ -69,9 +74,10 @@ HTTP/1.1 404 Not Found
 Code: NoSuchBucket
 ```
 
+![Non-existing bucket result](Screenshots/bucket_test_2.png)
+
 ### Python Bucket Scanner (POC)
-A simple Python script was created to automate bucket checks:  
-`python3 bucket_scan.py`
+A simple Python script was created to automate bucket checks: `python3 bucket_scan.py`
 
 Output:
 ```bash
@@ -79,11 +85,13 @@ lab2-bucket → 404
 lab2-bucket123 → 404
 ```
 
+![Python bucket scan result](Screenshots/python_bucket_scan.png)
+
 ### Questions
 #### 1. Can you find a bucket discovery tool for OCI?
 
 There are currently few dedicated bucket discovery tools for Oracle Cloud Infrastructure (OCI).
-Most existing tools are focused on AWS S3.
+Most existing tools primarily focus on AWS S3.
 
 Therefore, a custom Python script can be used to test bucket existence by sending HTTP requests to the OCI object storage endpoint.
 
