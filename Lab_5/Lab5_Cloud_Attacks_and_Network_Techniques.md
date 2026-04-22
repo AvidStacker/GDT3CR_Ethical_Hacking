@@ -602,3 +602,14 @@ The presence of explicit strings such as:
 This lab provided practical insight into cloud attack surfaces, especially how misconfigurations and internal services such as IMDS can be abused through SSRF.
 
 It also demonstrated the importance of network pivoting techniques in real-world offensive security scenarios.
+
+
+## Note
+
+During this lab, I encountered issues with my Oracle Cloud (OCI) account, which was unexpectedly terminated. As a result, I had to recreate my environment and set up a new instance before I could continue the lab.
+
+This caused delays in completing the assignment, and I sincerely apologize for the late submission.
+
+The same issue has also affected my progress in the course *Network Security and System Administration*.
+
+Thank you for your understanding.
