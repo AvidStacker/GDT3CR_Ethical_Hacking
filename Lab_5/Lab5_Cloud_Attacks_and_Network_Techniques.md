@@ -37,7 +37,7 @@ Scanning 65536 hosts [2 ports/host]
 
 ![Masscan network scan result](Screenshots/masscan_scan.png)
 
-This demonstrates how large internal network ranges can be scanned efficiently in a cloud environment.
+This demonstrates how large internal network ranges can be scanned efficiently in a cloud environment. However, such scanning may be restricted or monitored in real cloud environments.
 
 ## 5.1.4 Cloud Bucket Discovery
 ### Bucket Discovery Test
@@ -114,7 +114,7 @@ A password spraying attack was carried out using the FireProx tool together with
 From the results (see screenshots below) several valid user accounts could be identified, but with incorrect passwords, as well as two valid passwords (one with MFA enabled):
 
 ![MSOLSpray Credential Discovery 1](Screenshots/MSOLSpray_Credential_Discovery_1.png)
-![MSOLSpray Credential Discovery 1](Screenshots/MSOLSpray_Credential_Discovery_2.png)
+![MSOLSpray Credential Discovery 2](Screenshots/MSOLSpray_Credential_Discovery_2.png)
 
 ### Questions
 #### a) Find all users from the 400 username list with passwords you could recover and report it.
@@ -137,30 +137,77 @@ For example, legacy protocols such as IMAP or SMTP may not enforce MFA, conditio
 The IP address 169.254.169.254 is a link-local address used by cloud providers to host the Instance Metadata Service (IMDS). It is accessible only from within a cloud instance and provides information about the instance, such as configuration data, network details, and temporary security credentials (e.g., IAM roles). This service is commonly used by applications running on the instance to retrieve credentials and metadata without requiring external authentication.
 
 #### b) How can you from an instance in your selected cloud (a real cloud, not an emulation) view the Instance Metadata Service (IMDS) credentials via curl?
-You can find some of this information in the Console on the Instance Details page, or you can get all of it by logging in to the instance and using the metadata service. The service runs on every instance and is an HTTP endpoint listening on 169.254.169.254. If an instance has multiple VNICs, you must send the request using the primary VNIC.
 
-Using curl, metadata and credentials can be retrieved directly from the instance:
+The Instance Metadata Service (IMDS) is accessible from within the cloud instance via the link-local IP address 169.254.169.254. It provides metadata and configuration details about the instance.
 
-List available metadata:
-curl http://169.254.169.254/latest/meta-data/
+In Oracle Cloud Infrastructure (OCI), the metadata service requires an authorization header to access the API.
 
-Retrieve IAM role name:
-curl http://169.254.169.254/latest/meta-data/iam/security-credentials/
+A basic request without the header:
+curl http://169.254.169.254
 
-Retrieve credentials:
-curl http://169.254.169.254/latest/meta-data/iam/security-credentials/<ROLE_NAME>
+returns a restricted response (e.g., 404 or 403).
 
-The response typically includes sensitive information such as AccessKeyId, SecretAccessKey, and a session Token.
+To retrieve metadata, the following command is used:
 
-The service is only accessible from inside the instance and uses the primary network interface (VNIC).
+curl -H "Authorization: Bearer Oracle" http://169.254.169.254/opc/v2/instance/
 
-#### c) Try the SSRF/IMDS attack on your selected cloud tenancy using the included POC-script ssrf.py.
+This returns JSON data containing information such as:
+- Agent configuration
+- Enabled/disabled plugins
+- Monitoring and management settings
+
+The metadata service is only accessible from within the instance and must be accessed via the primary network interface (VNIC).
+
+#### c) Try the SSRF/IMDS attack on your selected cloud tenancy using the included POC-script ssrf.py. Is it possible via the web browser to get some sensitive instance metadata when calling the script? If so what url, commands, code, etc. did you use in this case?
+**Command:**
+```bash
+python3 ssrf_test.py
+```
+**Result:**
+The SSRF proof-of-concept script was successfully executed against the Oracle Cloud Instance Metadata Service (IMDS).
+
+The request returned an HTTP 200 response along with JSON data containing instance configuration details.
+
+![SSRF PoC Execution Against IMDS](Screenshots/SSRF_PoC_IMDS_Execution.png)
+
+The retrieved data includes:
+- Agent configuration settings
+- Enabled and disabled plugins
+- Monitoring and management configuration
+
+This demonstrates that the metadata service is accessible from within the instance and can be queried programmatically.
+This behavior is typical in SSRF attack scenarios, where internal services can be accessed indirectly through a vulnerable application.
+
+Furthermore, it illustrates how an SSRF vulnerability could be abused to access internal services such as IMDS if proper protections are not in place.
+
+However, the requirement of the Authorization: Bearer Oracle header indicates that additional security controls (similar to IMDSv2) are implemented to mitigate unauthorized access.
+
+The metadata endpoint was initially tested and returned a restricted response:
+
+![IMDS Endpoint Reachability](Screenshots/IMDS_Endpoint_Reachability.png)
+
+After adding the required authorization header, metadata could be retrieved:
+
+![IMDS Metadata Access with Authorization Header](Screenshots/IMDS_Metadata_Access.png)
+
+Finally, access was also demonstrated through an SSH tunnel, simulating SSRF-style access:
+
+![IMDS Access via SSH Tunnel](Screenshots/SSRF_IMDS_Tunnel_Access.png)
+
+
+It was also tested whether metadata could be accessed via a web browser.
+
+Direct browser access to http://169.254.169.254/opc/v2/instance/ is restricted and does not return useful data without the required Authorization header.
+
+However, by using an SSRF-capable application or proxying the request (e.g., via SSH tunnel or script), it is possible to retrieve metadata programmatically.
+
+This highlights the importance of restricting access to internal services, as SSRF vulnerabilities can bypass traditional network boundaries and expose sensitive cloud metadata.
 
 #### d) How can we prevent the abuse of SSRF/IMDS attacks?
 SSRF/IMDS attacks can be prevented by restricting access to the metadata service and securing how applications handle external requests.
 
 Key protections include:
-- Enforcing IMDSv2 (token based authentication) instead of IMDSv1
+- Using authentication mechanisms (such as required headers) to protect metadata access
 - Blocking access to 169.254.169.254 using firewall or network rules
 - Validating and restricting user-supplied URLs (e.g. using allowlists)
 - Applying least privilege to instance roles to limit impact if credentials are leaked
@@ -261,8 +308,6 @@ The bot connects to an IRC-based botnet command-and-control server using the nic
 
 #### f) This is a capture from a compromised system which boots up, runs for just about 3 minutes, then CPU utilization hits 100% and the system locks up. Using clientdying.pcap describe what is happening? Hint! Start by looking at the protocols (Statistics > Protocol Hierarchy). We knew this client system didn’t talk RPC, IRC or TFTP. Typically finding those applications scream hacked!
 
-#### f) This is a capture from a compromised system which boots up, runs for just about 3 minutes, then CPU utilization hits 100% and the system locks up. Using clientdying.pcap describe what is happening?
-
 **Analysis method:**
 Statistics → Protocol Hierarchy
 
@@ -358,7 +403,7 @@ The returned HTML content verifies successful proxying.
 
 ### 5.5.3 Multi-hop / Pivot SSH Tunnel 
 **Note:**
-In this case i moved to my main pc and used windows Powershell
+In this case, the attack was executed from a Windows host using PowerShell.
 
 **Command:**
 - From Windows to external cloud VM (OCI):
@@ -380,6 +425,8 @@ A multi-hop SSH tunnel (double pivot) was successfully established:
 1. Windows → External VM (79.76.57.20)
 2. External VM → Internal host (maggie.du.se)
 3. Internal host → Target (sqube-student.du.se:9000)
+
+This setup demonstrates a double pivot technique, where the attacker leverages an external cloud instance as an intermediary to reach internal network resources.
 
 This allowed access to an internal web service from the attacker machine.
 The HTTP 200 response and returned HTML confirm that the pivot chain is working correctly.
@@ -436,7 +483,7 @@ CyberChef automatically detected the transformation as Base64 decoding, confirmi
 **Conclusion:**
 The application implements a Base64 encoding/decoding algorithm. This technique is commonly used in web applications, email systems, and simple obfuscation methods in malware.
 
-**Figure 8:** Decompiled code showing Base64 encoding/decoding functions in dnSpy.  
+**Figure 7:** Decompiled code showing Base64 encoding/decoding functions in dnSpy.  
 ![Figure 7](Screenshots/5.6_reverse_engineering_base64.png)
 
 **Figure 8:** Program execution showing Base64 encoding result in the application.
@@ -545,3 +592,10 @@ It implements a backdoor that:
 
 The presence of explicit strings such as:
 `BY SIMPP BACKDOORED SYSTEM INFO - cmd->` confirms that the program is designed for unauthorized remote access and control of the infected system.
+
+
+## Reflection
+
+This lab provided practical insight into cloud attack surfaces, especially how misconfigurations and internal services such as IMDS can be abused through SSRF.
+
+It also demonstrated the importance of network pivoting techniques in real-world offensive security scenarios.
