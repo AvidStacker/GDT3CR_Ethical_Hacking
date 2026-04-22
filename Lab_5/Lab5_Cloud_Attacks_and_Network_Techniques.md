@@ -127,7 +127,7 @@ From the results (see screenshots below) several valid user accounts could be id
 The password spraying attack resulted in two valid credential pairs. One account required MFA, while the other allowed direct authentication.
 
 #### b) If a user have MFA enabled for his/her MS 365 account, how could we potentially bypass this protection?
-MFA can potentially be bypassed through missconfigurations, legacy authentication features or token/session abuse.
+MFA can potentially be bypassed through misconfigurations, legacy authentication features or token/session abuse.
 
 For example, legacy protocols such as IMAP or SMTP may not enforce MFA, conditional access policies can be misconfigured to exclude certain users or locations, and stolen session tokens can allow access without re-authentication.
 
@@ -176,6 +176,9 @@ The retrieved data includes:
 - Monitoring and management configuration
 
 This demonstrates that the metadata service is accessible from within the instance and can be queried programmatically.
+
+The data retrieved via the SSRF script matches the data obtained manually using curl, confirming that the SSRF attack successfully accesses the same IMDS endpoint.
+
 This behavior is typical in SSRF attack scenarios, where internal services can be accessed indirectly through a vulnerable application.
 
 Furthermore, it illustrates how an SSRF vulnerability could be abused to access internal services such as IMDS if proper protections are not in place.
